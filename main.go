@@ -14,6 +14,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -133,9 +134,10 @@ func getApplicationName(clientID string) (string, error) {
 }
 
 // getRedirectURI queries Kong's '/oauth2/authorize' endpoint and returns the 'redirect_uri' property
-func getRedirectURI(consent ConsentRequest) (string, error) {
+func getRedirectURI(consent ConsentRequest) (map[string]interface{}, error) {
 	authPath := kongProxyEndpoint + apiPath + "/oauth2/authorize"
 
+	response := make(map[string]interface{})
 	data := url.Values{}
 	data.Set("client_id", consent.ClientID)
 	data.Add("response_type", consent.ResponseType)
@@ -146,22 +148,22 @@ func getRedirectURI(consent ConsentRequest) (string, error) {
 
 	req, err := http.NewRequest(http.MethodPost, authPath, bytes.NewBufferString(data.Encode()))
 	if err != nil {
-		return "", err
+		return response, err
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	body, exErr := executeRequest(req)
 	if exErr != nil {
-		return "", exErr
+		return response, exErr
 	}
 
-	response := AuthorizeResponse{}
 	jsonErr := json.Unmarshal(body, &response)
 	if jsonErr != nil {
-		return "", jsonErr
+		return response, jsonErr
 	}
 
-	return response.RedirectURI, nil
+	fmt.Println(response)
+	return response, nil
 }
 
 // getIndex returns the home view on a GET request
@@ -169,7 +171,7 @@ func getIndex(ctx iris.Context) {
 	// To begin the OAuth 2.0 Authorization Code Grant flow the client application should redirect the user to
 	// the consent endpoint, passing client_id, response_type and scope parameters.
 	// For demonstration purposes we construct this URI and display it on the home page.
-	consentURI := "/consent?client_id=" + demoClientID + "&response_type=code&scopes=email%2Cphone%2Caddress"
+	consentURI := "/consent?client_id=" + demoClientID + "&response_type=code&scopes=email"
 	ctx.ViewData("consentURI", consentURI)
 	ctx.View("index.html")
 }
@@ -237,7 +239,7 @@ func postConsent(ctx iris.Context) {
 
 	// At this point the user should be redirected back to the client application.
 	// For demonstration purposes the redirect URI is simply output.
-	ctx.WriteString("redirect_uri: " + redirectURI)
+	ctx.WriteString(fmt.Sprintf("redirect_uri: %v", redirectURI))
 }
 
 // getLogin returns the login view on a GET request

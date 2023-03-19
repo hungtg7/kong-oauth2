@@ -2,10 +2,11 @@ version: '2.1'
 
 services:
   kong-database:
-    image: postgres:9.5
+    image: postgres
     environment:
       - POSTGRES_USER=kong
       - POSTGRES_DB=kong
+      - POSTGRES_HOST_AUTH_METHOD=trust
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -20,7 +21,7 @@ services:
     environment:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=kong-database
-    command: kong migrations up
+    command: kong migrations bootstrap 
 
   kong:
     image: kong

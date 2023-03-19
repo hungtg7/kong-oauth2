@@ -1,0 +1,61 @@
+_format_version: "3.0"
+consumers:
+- oauth2_credentials:
+  - client_id: cjGMwcJlillC8w2UDBT32gy4Dc2uFTxV
+    client_secret: JA8lTyCnGPcK6LOwYmr1bbEjI6RasUgE
+    client_type: confidential
+    hash_secret: false
+    name: Test Client Application
+    redirect_uris:
+    - http://some-domain/endpoint/
+  username: testclient
+services:
+- connect_timeout: 60000
+  enabled: true
+  host: mockbin.org
+  name: test-service
+  plugins:
+  - config:
+      accept_http_if_already_terminated: false
+      anonymous: null
+      auth_header_name: authorization
+      enable_authorization_code: true
+      enable_client_credentials: false
+      enable_implicit_grant: false
+      enable_password_grant: false
+      global_credentials: false
+      hide_credentials: false
+      mandatory_scope: true
+      pkce: lax
+      provision_key: h02WLDiLC2FEPW2N1CSxubp0yMEA8FWV
+      refresh_token_ttl: 1209600
+      reuse_refresh_token: false
+      scopes:
+      - email
+      token_expiration: 7200
+    enabled: true
+    name: oauth2
+    protocols:
+    - grpc
+    - grpcs
+    - http
+    - https
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    id: ed5b737a-17aa-4836-8783-0cc7d7cbda61
+    path_handling: v0
+    paths:
+    - /myapi
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+  write_timeout: 60000
